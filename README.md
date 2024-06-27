@@ -14,8 +14,14 @@ Currently there is four scripts to allow for the following capabilities.
 
 * Python 3.x
 * `requests` library
+* `urllib3` Library
+* `tabulate` Library
 * `psm.py` module for obtaining the PSM token
 
+
+## Install requirements using 
+
+pip3 install -r requirements.txt
 
 ##  Configuration File
 
