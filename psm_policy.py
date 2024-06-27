@@ -9,10 +9,13 @@ import argparse
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Initialize the argument parser
-parser = argparse.ArgumentParser(description='Add or delete a policy in PSM')
+parser = argparse.ArgumentParser(description='Add or delete an application or policy in PSM')
+parser.add_argument('--add-app', action='store_true', help='Flag to add an application')
+parser.add_argument('--del-app', action='store_true', help='Flag to delete an application')
 parser.add_argument('--add-policy', action='store_true', help='Flag to add a policy')
 parser.add_argument('--del-policy', action='store_true', help='Flag to delete a policy')
-parser.add_argument('--name', type=str, required=True, help='Name of the policy')
+parser.add_argument('--name', type=str, required=True, help='Name of the application or policy')
+parser.add_argument('--definition', action='append', help='Application definition in the form "protocol:port" or "protocol:port-range"')
 parser.add_argument('--apps', type=str, help='Comma-separated list of application names')
 parser.add_argument('--action', type=str, choices=['permit', 'deny'], help='Action for the policy')
 parser.add_argument('--from-source-ip', type=str, help='Comma-separated list of source IP addresses')
@@ -36,6 +39,42 @@ token = psm.ObtainPSMToken()
 if args.debug:
     print("Token obtained successfully.")
 
+# Function to post the application to PSM
+def post_app_to_psm(token, app_name, definitions):
+    psmipaddress = json.load(open('config.json'))['psmipaddress']
+    url = f"https://{psmipaddress}/configs/security/v1/tenant/default/apps"
+    headers = psm.constructHeader(token)
+    proto_ports = [{'protocol': d['protocol'], 'ports': d['port']} for d in definitions]
+    app_data = {
+        "kind": None,
+        "api-version": None,
+        "meta": {
+            "name": app_name,
+            "tenant": "default",
+            "namespace": None,
+            "generation-id": None,
+            "resource-version": None,
+            "uuid": None,
+            "labels": None,
+            "self-link": None,
+            "display-name": None
+        },
+        "spec": {
+            "proto-ports": proto_ports,
+            "timeout": None
+        }
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(app_data), verify=False)
+    return response.status_code, response.json()
+
+# Function to delete the application from PSM
+def delete_app_from_psm(token, app_name):
+    psmipaddress = json.load(open('config.json'))['psmipaddress']
+    url = f"https://{psmipaddress}/configs/security/v1/tenant/default/apps/{app_name}"
+    headers = psm.constructHeader(token)
+    response = requests.delete(url, headers=headers, verify=False)
+    return response.status_code, response.json()
+
 # Function to post the policy to PSM
 def post_policy_to_psm(token, policy_data):
     psmipaddress = json.load(open('config.json'))['psmipaddress']
@@ -56,6 +95,36 @@ def delete_policy_from_psm(token, policy_name):
     response = requests.delete(url, headers=headers, verify=False)
     return response.status_code, response.json()
 
+# Add application
+if args.add_app:
+    if not args.definition:
+        print("Error: --definition argument is required when using --add-app.")
+        sys.exit(1)
+
+    # Process definitions
+    definitions = []
+    for definition in args.definition:
+        protocol, port = definition.split(':')
+        definitions.append({
+            'protocol': protocol.upper(),
+            'port': port
+        })
+
+    # Post the application to PSM
+    status_code, response = post_app_to_psm(token, args.name, definitions)
+    if status_code == 200:
+        print(f"Application {args.name} added successfully.")
+    else:
+        print(f"Failed to add application {args.name}. Response: {response}")
+
+# Delete application
+if args.del_app:
+    status_code, response = delete_app_from_psm(token, args.name)
+    if status_code == 200:
+        print(f"Application {args.name} deleted successfully.")
+    else:
+        print(f"Failed to delete application {args.name}. Response: {response}")
+
 # Add policy
 if args.add_policy:
     # Split input arguments into lists if provided
@@ -66,35 +135,32 @@ if args.add_policy:
     from_ip_collections = args.from_ip_collections.split(',') if args.from_ip_collections else []
     to_ip_collections = args.to_ip_collections.split(',') if args.to_ip_collections else []
 
-    # Set default value to 'ANY' if no other from/to entries are defined
-    if not from_ip_addresses and not from_workload_groups and not from_ip_collections:
-        from_ip_addresses = ["ANY"]
+    # Determine if there are any rules to add
+    has_rules = any([
+        from_ip_addresses, to_ip_addresses, from_workload_groups,
+        to_workload_groups, from_ip_collections, to_ip_collections, args.apps
+    ])
 
-    if not to_ip_addresses and not to_workload_groups and not to_ip_collections:
-        to_ip_addresses = ["ANY"]
+    # Construct the rule if there are any rules to add
+    rule = None
+    if has_rules:
+        rule = {
+            "apps": args.apps.split(",") if args.apps else [],
+            "action": args.action if args.action else None,
+            "from-ip-addresses": from_ip_addresses if from_ip_addresses else None,
+            "to-ip-addresses": to_ip_addresses if to_ip_addresses else None,
+            "from-workload-groups": from_workload_groups if from_workload_groups else None,
+            "to-workload-groups": to_workload_groups if to_workload_groups else None,
+            "description": args.description if args.description else None,
+            "disable": args.disable if args.disable else None,
+            "from-ipcollections": from_ip_collections if from_ip_collections else None,
+            "to-ipcollections": to_ip_collections if to_ip_collections else None,
+            "labels": None
+        }
+        # Filter out None values
+        rule = {k: v for k, v in rule.items() if v}
 
-    # Split the apps argument into a list if provided
-    apps_list = args.apps.split(",") if args.apps else []
-
-    # Construct the rule
-    rule = {
-        "apps": apps_list,
-        "action": args.action if args.action else None,
-        "from-ip-addresses": from_ip_addresses,
-        "to-ip-addresses": to_ip_addresses,
-        "from-workload-groups": from_workload_groups if from_workload_groups else None,
-        "to-workload-groups": to_workload_groups if to_workload_groups else None,
-        "description": args.description if args.description else None,
-        "name": args.name,
-        "disable": args.disable if args.disable else None,
-        "from-ipcollections": from_ip_collections if from_ip_collections else None,
-        "to-ipcollections": to_ip_collections if to_ip_collections else None,
-        "labels": None
-    }
-
-    # Filter out None values
-    rule = {k: v for k, v in rule.items() if v is not None}
-
+    # Construct the policy data
     policy_data = {
         "kind": None,
         "api-version": None,
@@ -111,7 +177,7 @@ if args.add_policy:
         },
         "spec": {
             "attach-tenant": True,
-            "rules": [rule],
+            "rules": [rule] if rule else [],
             "priority": args.priority if args.priority else None,
             "policy-distribution-targets": [
                 args.policy_dist_target if args.policy_dist_target else "default"
