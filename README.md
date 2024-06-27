@@ -16,7 +16,7 @@ Currently there is four scripts to allow for the following capabilities.
 - `requests` library
 - `psm.py` module for obtaining the PSM token
 
-## Configuration
+## JSON Configuration File
 
 Each of these scripts leverages the psm.py script as a Python module to authenticate to the PSM server and retrieve the authentication token that is used for all subsequent REST commanded issued to the PSM server. There should be a file called config.json in the same directory that has the details of the PSM server IP/Host name as well as authentication details. This file should be in the following format. 
 
