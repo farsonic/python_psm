@@ -15,12 +15,12 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Initialize the argument parser
 parser = argparse.ArgumentParser(description='Add a policy to PSM')
 parser.add_argument('--name', type=str, help='Name of the policy')
-parser.add_argument('--policy-dist-target', type=str, help='Policy distribution targets')
+#parser.add_argument('--policy-dist-target', type=str, help='Policy distribution targets')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')
 parser.add_argument('--load-json', type=str, help='Load policy from JSON file')
 parser.add_argument('--save-json', type=str, help='Save policy to JSON file')
-parser.add_argument('--source-ip-addresses', type=str, help='Source IP addresses in CIDR notation (comma-separated)')
-parser.add_argument('--destination-ip-addresses', type=str, help='Destination IP addresses in CIDR notation (comma-separated)')
+#parser.add_argument('--source-ip-addresses', type=str, help='Source IP addresses in CIDR notation (comma-separated)')
+#parser.add_argument('--destination-ip-addresses', type=str, help='Destination IP addresses in CIDR notation (comma-separated)')
 parser.add_argument('--import-csv', type=str, help='Import iterations from CSV file')
 
 # Parse the command line arguments
