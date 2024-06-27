@@ -70,7 +70,7 @@ python3 psm_policy.py --del-policy --name "IPCollectionPolicy"
 python psm_policy.py --add-policy --name "DebugPolicy" --apps "FTP" --action "permit" --from-source-ip "10.0.0.0/24" --to-destination-ip "10.0.1.0/24" --description "Permit FTP traffic with debug mode"  --debug
 python psm_policy.py --del-policy --name "DebugPolicy" 
 
-python3 psm_add_policy.py --name "CombinationPolicy" --apps "DNS" --action "permit" --from-ip-collections "Group1,Group2" --to-workload-group "vmgroup2" --from-source-ip "192.168.1.0/24" --to-destination-ip "192.168.2.0/24,192.168.2.10/24" --description "Permit traffic between combination"
+python3 psm_policy.py --add-policy --name "CombinationPolicy" --apps "DNS" --action "permit" --from-ip-collections "Group1,Group2" --to-workload-group "vmgroup2" --from-source-ip "192.168.1.0/24" --to-destination-ip "192.168.2.0/24,192.168.2.10/24" --description "Permit traffic between combination"
 ```
 
 ### Creation and deletion of a single Policy with Bulk rule addition
@@ -99,7 +99,7 @@ Each column represents the following values
 
 #### Examples
 ```
-python3 psm_add_policy_test.py --add-policy --name "BigPolicy_VLAN100"
+python3 psm_policy.py --add-policy --name "BigPolicy_VLAN100"
 python3 psm_add_bulk_rules.py --name "BigPolicy_VLAN100" --import-csv bulkrules.csv --save-json vlan100_A.json
 
 python3 psm_add_bulk_rules.py --name "BigPolicy_VLAN100" --load-json vlan100_A.json
