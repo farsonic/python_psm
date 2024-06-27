@@ -1,6 +1,14 @@
 ## Python scripts to added address objects and policies/rules to PSM 
 
-The following scripts are intended for lab testing use only and are not supported by me. 
+The following scripts are intended for lab testing use only and are not supported by me but should serve as a good example to push application objects and various policies to PSM and then subsequently into attached CX10000 switches under management. 
+
+Currently there is three scripts to allow for 
+
+* Application definition creation (psm_add_app.py)
+* Single policy and rule creation (psm_add_policy.py) 
+* Bulk policy and rule creation (psm_add_bulk_rules.py) 
+
+
 
 
 #### Adding a Policy with Source and Destination IP Addresses
