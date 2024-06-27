@@ -36,7 +36,7 @@ Each of these scripts leverages the psm.py script as a Python module to authenti
 
 This script will quickly allow for the creation of a security policy within PSM. This policy is not attached by default to an existing VRF or a network and will be the responsibility of the operator to assign this as well as perform any network redirection to have traffic pass through the policy. When policy is pushed to PSM it is done as a single PUT of the entire policy and doesn't allow for a PATCH function. Therefore this example really only allows for the creation of a single rule for each policy. For adding bulk rules please refer to the additional script below. 
 
-The following examples allow for the creation and deletion of a single policy/rule into the configured PSM server. There are several options that can be leveraged 
+The following examples allow for the creation and deletion of a single policy/rule into the configured PSM server. There are several options that can be leveraged and the script should accommodate multiple --source and --destination options of each type. If there is no entry provided for a --source or --destination then the value should be set to ANY.  
 
 OPTIONS
 
@@ -98,7 +98,7 @@ OPTIONS
               Enable debug mode.
 
 
-#### Examples
+#### Policy addition and deletion examples
 ```
 python3 psm_policy.py --add-policy --name "TestPolicy" --apps "HTTPS" --action "permit" --from-source-ip "192.168.1.0/24" --to-destination-ip "192.168.2.0/24" --description "Permit policy for HTTPS traffic"
 python3 psm_policy.py --del-policy --name "TestPolicy"
