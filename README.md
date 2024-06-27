@@ -1,6 +1,6 @@
 # Python scripts to added address objects and policies/rules to PSM 
 
-The following scripts are intended for lab testing use only and are not supported by me but should serve as a good example to push application objects and various policies to PSM and then subsequently into attached CX10000 switches under management. 
+The following scripts are intended for lab testing use only and are not supported by me but should serve as a good example to push application objects and various policies to PSM and then subsequently into attached CX10000 switches under management. The code was written and iterated and it is possible there is some redundant functions - especially in the bulk addition code :) 
 
 Currently there is four scripts to allow for the following capabilities. 
 
@@ -33,9 +33,14 @@ Each of these scripts leverages the psm.py script as a Python module to authenti
 
 This script will quickly allow for the creation or deletion of an application object within PSM. The application defintition itself does nothing until it is attached to a rule within a security policy. The application creation process should allow for complex application definition creation using multiple protocols and source/destination numbers. 
 
+#### Examples 
 
+```
+python3 psm_app.py --add-app --name "myapp" --definition "udp:6789-6800" --definition "tcp:555-556"
+python3 psm_app.py --del-app --name "myapp"
+```
 
-### Creation and deletion of a single policy
+### Creation and deletion of a single policy/rule
 
 This script will quickly allow for the creation or deletion of a security policy within PSM. This policy is not attached by default to an existing VRF or a network and will be the responsibility of the operator to assign this as well as perform any network redirection to have traffic pass through the policy. When policy is pushed to PSM it is done as a single PUT of the entire policy and doesn't allow for a PATCH function. Therefore this example really only allows for the creation of a single rule for each policy. For adding bulk rules please refer to the additional script below. 
 
@@ -45,6 +50,9 @@ Use the --help option to see all available arguments.
 
 #### Examples
 ```
+python3 psm_policy.py --add-policy --name "norules"
+python3 psm_policy.py --del-policy --name "norules"
+
 python3 psm_policy.py --add-policy --name "TestPolicy" --apps "HTTPS" --action "permit" --from-source-ip "192.168.1.0/24" --to-destination-ip "192.168.2.0/24" --description "Permit policy for HTTPS traffic"
 python3 psm_policy.py --del-policy --name "TestPolicy"
 
@@ -59,3 +67,7 @@ python psm_policy.py --del-policy --name "DebugPolicy"
 
 python3 psm_add_policy.py --name "CombinationPolicy" --apps "DNS" --action "permit" --from-ip-collections "Group1,Group2" --to-workload-group "vmgroup2" --from-source-ip "192.168.1.0/24" --to-destination-ip "192.168.2.0/24,192.168.2.10/24" --description "Permit traffic between combination"
 ```
+
+### Creation and deletion of a single Policy with Bulk rule addition
+
+In order to attach multiple rules to a single policy the psm_policy script was modified to allow for multiple rules to be added to a single 
