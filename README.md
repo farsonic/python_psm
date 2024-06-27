@@ -95,6 +95,8 @@ Each column represents the following values
 ```
 python3 psm_add_policy_test.py --add-policy --name "BigPolicy_VLAN100"
 python3 psm_add_bulk_rules.py --name "BigPolicy_VLAN100" --import-csv bulkrules.csv --save-json vlan100_A.json
+
+python3 psm_add_bulk_rules.py --name "BigPolicy_VLAN100" --load-json vlan100_A.json
 ```
 
 This will create the following 
@@ -120,3 +122,6 @@ Summary of Configurations for Policy: BigPolicy_VLAN100
 
 Total number of rules created: 8002
 ```
+
+When the bulk addition runs if performs a HTTP PUT of the entire JSON structure for the assigned policy to PSM. This will override all existing rules and push this down to the assocaited DSMs where needed.  
+
