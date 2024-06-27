@@ -39,6 +39,7 @@ This script will quickly allow for the creation of a security policy within PSM.
 The following examples allow for the creation and deletion of a single policy/rule into the configured PSM server. There are several options that can be leveraged 
 
 OPTIONS
+
        --add-app
               Flag to add an application.
 
